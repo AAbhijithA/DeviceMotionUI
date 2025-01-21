@@ -34,7 +34,7 @@ function App() {
     alert("DeviceMotionAPI not supported");
   }
 
-  setInterval(updateAcceleration, 1000);
+  setInterval(updateAcceleration, 10000);
 
   return (
     <div>
