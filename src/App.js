@@ -1,6 +1,5 @@
-import logo from './logo.svg';
+import { useEffect, useState } from 'react';
 import './App.css';
-import { use, useState } from 'react';
 
 function App() {
   const [acceleration, setAcceleration] = useState(null);
@@ -9,32 +8,39 @@ function App() {
   const [zAcceleration, setZAcceleration] = useState(0);
   const [overallAcceleration, setOverallAcceleration] = useState(0);
 
-  function updateAccelerationObject(event) {
-    setAcceleration(event.acceleration);
-  }
-
-  function updateAcceleration() {
-    if(acceleration) {
-      const x = acceleration.x ? acceleration.x.toFixed(2) : 0;
-      const y = acceleration.y ? acceleration.y.toFixed(2) : 0;
-      const z = acceleration.z ? acceleration.z.toFixed(2) : 0;
-      setXAcceleration(x);
-      setYAcceleration(y);
-      setZAcceleration(z);
-      setOverallAcceleration(
-        Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2)).toFixed(2)
-      );
+  useEffect(() => {
+    function updateAccelerationObject(event) {
+      setAcceleration(event.acceleration);
     }
-  }
 
-  if(window.DeviceMotionEvent) {
-    window.addEventListener('devicemotion', updateAccelerationObject);
-  }
-  else {
-    alert("DeviceMotionAPI not supported");
-  }
+    if (window.DeviceMotionEvent) {
+      window.addEventListener('devicemotion', updateAccelerationObject);
+    }
+    else {
+      alert('DeviceMotionAPI not supported');
+    }
 
-  setInterval(updateAcceleration, 10000);
+    return () => {
+      window.removeEventListener('devicemotion', updateAccelerationObject);
+    };
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (acceleration) {
+        const x = acceleration.x ? acceleration.x.toFixed(2) : 0;
+        const y = acceleration.y ? acceleration.y.toFixed(2) : 0;
+        const z = acceleration.z ? acceleration.z.toFixed(2) : 0;
+        setXAcceleration(x);
+        setYAcceleration(y);
+        setZAcceleration(z);
+        setOverallAcceleration(
+          Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2)).toFixed(2)
+        );
+      }
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [acceleration]);
 
   return (
     <div>
