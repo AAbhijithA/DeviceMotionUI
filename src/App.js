@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, use } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './App.css';
 
 function App() {
@@ -8,35 +8,35 @@ function App() {
   const [zAcceleration, setZAcceleration] = useState(0);
   const [overallAcceleration, setOverallAcceleration] = useState(0);
 
-  const accelerationReference = useRef(null);
+  const accelerationRef = useRef(null);
 
   useEffect(() => {
     function updateAccelerationObject(event) {
       setAcceleration(event.acceleration);
     }
 
-    if(window.DeviceMotionEvent) {
+    if (window.DeviceMotionEvent) {
       window.addEventListener('devicemotion', updateAccelerationObject);
     }
     else {
       alert('DeviceMotionAPI not supported');
     }
+
     return () => {
       window.removeEventListener('devicemotion', updateAccelerationObject);
     };
   }, []);
 
   useEffect(() => {
-    accelerationReference.current = acceleration;
+    accelerationRef.current = acceleration;
   }, [acceleration]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if(accelerationReference.current) {
-        const x = accelerationReference.current.x ? accelerationRef.current.x.toFixed(2) : 0;
-        const y = accelerationReference.current.y ? accelerationRef.current.y.toFixed(2) : 0;
-        const z = accelerationReference.current.z ? accelerationRef.current.z.toFixed(2) : 0;
-
+      if(accelerationRef.current) {
+        const x = accelerationRef.current.x ? accelerationRef.current.x.toFixed(2) : 0;
+        const y = accelerationRef.current.y ? accelerationRef.current.y.toFixed(2) : 0;
+        const z = accelerationRef.current.z ? accelerationRef.current.z.toFixed(2) : 0;
         setXAcceleration(x);
         setYAcceleration(y);
         setZAcceleration(z);
@@ -45,6 +45,7 @@ function App() {
         );
       }
     }, 1000);
+
     return () => clearInterval(interval);
   }, []);
 
