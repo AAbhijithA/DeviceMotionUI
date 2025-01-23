@@ -1,5 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
+import { Line } from "react-chartjs-2";
 import './App.css';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 function App() {
   const [acceleration, setAcceleration] = useState(null);
@@ -7,6 +18,28 @@ function App() {
   const [yAcceleration, setYAcceleration] = useState(0);
   const [zAcceleration, setZAcceleration] = useState(0);
   const [overallAcceleration, setOverallAcceleration] = useState(0);
+  const [data, setData] = useState({
+      labels: [1],
+      datasets: [
+        {
+          label: "Acceleration",
+          data: [0],
+          fill: true,
+          backgroundColor: "rgba(197, 124, 233, 0.2)",
+          borderColor: "rgb(23, 5, 33)"
+        }
+      ]
+    }
+  )
+  const options = {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true,
+        min: 0,
+      },
+    },
+  };
 
   const accelerationRef = useRef(null);
 
@@ -40,9 +73,20 @@ function App() {
         setXAcceleration(x);
         setYAcceleration(y);
         setZAcceleration(z);
-        setOverallAcceleration(
-          Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2)).toFixed(2)
-        );
+        const newOverallAcceleration = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2)).toFixed(2);
+        setOverallAcceleration(newOverallAcceleration);
+        setData((prevData) => ({
+          labels: [...prevData.labels, prevData.labels[prevData.labels.length - 1] + 1],
+          datasets: [
+            {
+              label: "Acceleration",
+              data: [...prevData.datasets[0].data, newOverallAcceleration],
+              fill: true,
+              backgroundColor: "rgba(152, 42, 207, 0.2)",
+              borderColor: "rgb(22, 8, 30)"
+            }
+          ]
+        }));
       }
     }, 1000);
 
@@ -56,6 +100,7 @@ function App() {
       <div>Acceleration Y: {yAcceleration}</div>
       <div>Acceleration Z: {zAcceleration}</div>
       <div>Overall Acceleration: {overallAcceleration}</div>
+      <Line options={options} data={data} />
     </div>
   );
 }
