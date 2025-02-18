@@ -184,7 +184,6 @@ function App() {
           </MapContainer>
         </div>
       </div>
-
       <div className="motion-section">
         <h1 className="motion-title">Jerk Data & Device Motion</h1>
         <div className="chart-container">
