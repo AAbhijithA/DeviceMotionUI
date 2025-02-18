@@ -2,6 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Line } from "react-chartjs-2";
 import './App.css';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import {
+  MapContainer,
+  TileLayer,
+  useMap,
+  Marker,
+} from 'react-leaflet'
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -11,6 +18,14 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+
+const UpdateMarker = ({ pos }) => {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(pos, map.getZoom());
+  }, [pos, map]);
+  return <Marker position={pos} />;
+};
 
 function App() {
   const [acceleration, setAcceleration] = useState(null);
@@ -30,7 +45,8 @@ function App() {
         }
       ]
     }
-  )
+  );
+  const [pos, setPosition] = useState([51.505, -0.09]);
   const options = {
     responsive: true,
     scales: {
@@ -88,19 +104,42 @@ function App() {
           ]
         }));
       }
+      navigator.geolocation.getCurrentPosition(function(position) {
+        setPosition([position.coords.latitude, position.coords.longitude]);
+      });
+      console.log(pos)
     }, 1000);
 
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div>
-      <h1>Device Motion</h1>
-      <div>Acceleration X: {xAcceleration}</div>
-      <div>Acceleration Y: {yAcceleration}</div>
-      <div>Acceleration Z: {zAcceleration}</div>
-      <div>Overall Acceleration: {overallAcceleration}</div>
-      <Line options={options} data={data} />
+    <div className="container">
+      <div className="map-section">
+        <h2 className="map-title">Location Map</h2>
+        <div className="map-container">
+          <MapContainer center={pos} zoom={13} style={{ height: "100%", width: "100%" }}>
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            />
+            <UpdateMarker pos={pos} />
+          </MapContainer>
+        </div>
+      </div>
+
+      <div className="motion-section">
+        <h1 className="motion-title">Device Motion</h1>
+        <div className="acceleration-grid">
+          <div>Acceleration X: {xAcceleration}</div>
+          <div>Acceleration Y: {yAcceleration}</div>
+          <div>Acceleration Z: {zAcceleration}</div>
+          <div>Overall Acceleration: {overallAcceleration}</div>
+        </div>
+        <div className="chart-container">
+          <Line options={options} data={data} />
+        </div>
+      </div>
     </div>
   );
 }
