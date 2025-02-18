@@ -38,6 +38,26 @@ const UpdateMarker = ({ pos }) => {
   return <Marker position={pos} />;
 };
 
+function jerkCalculator(newOverallAcceleration) {
+  let jerk = 0, rangeFraction;
+  if(newOverallAcceleration <= 15) {
+    rangeFraction = newOverallAcceleration / 15;
+    jerk = rangeFraction;
+  } 
+  else if(newOverallAcceleration <= 40) {
+    rangeFraction = (newOverallAcceleration - 15) / (40 - 15);
+    jerk = 1 + rangeFraction;
+  }
+  else if(newOverallAcceleration <= 60) {
+    rangeFraction = (newOverallAcceleration - 40) / (60 - 40);
+    jerk = 2 + rangeFraction;
+  }
+  else {
+    jerk = 4;
+  }
+  return jerk;
+}
+
 function App() {
   const [acceleration, setAcceleration] = useState(null);
   const [xAcceleration, setXAcceleration] = useState(0);
@@ -52,6 +72,19 @@ function App() {
           data: [0],
           fill: true,
           backgroundColor: "rgba(197, 124, 233, 0.2)",
+          borderColor: "rgb(23, 5, 33)"
+        }
+      ]
+    }
+  );
+  const [jerkData, setJerkData] = useState({
+      labels: [1],
+      datasets: [
+        {
+          label: "Jerk Data",
+          data: [0],
+          fill: true,
+          backgroundColor: "rgba(104, 255, 90, 0.7)",
           borderColor: "rgb(23, 5, 33)"
         }
       ]
@@ -102,6 +135,7 @@ function App() {
         setZAcceleration(z);
         const newOverallAcceleration = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2)).toFixed(2);
         setOverallAcceleration(newOverallAcceleration);
+        const newJerk = jerkCalculator(newOverallAcceleration);
         setData((prevData) => ({
           labels: [...prevData.labels, prevData.labels[prevData.labels.length - 1] + 1],
           datasets: [
@@ -110,6 +144,18 @@ function App() {
               data: [...prevData.datasets[0].data, newOverallAcceleration],
               fill: true,
               backgroundColor: "rgba(152, 42, 207, 0.2)",
+              borderColor: "rgb(22, 8, 30)"
+            }
+          ]
+        }));
+        setJerkData((prevJData) => ({
+          labels: [...prevJData.labels, prevJData.labels[prevJData.labels.length - 1] + 1],
+          datasets : [
+            {
+              label: "Jerk Data",
+              data: [...prevJData.datasets[0].data, newJerk],
+              fill: true,
+              backgroundColor: "rgba(104, 255, 90, 0.7)",
               borderColor: "rgb(22, 8, 30)"
             }
           ]
@@ -140,7 +186,10 @@ function App() {
       </div>
 
       <div className="motion-section">
-        <h1 className="motion-title">Device Motion</h1>
+        <h1 className="motion-title">Jerk Data & Device Motion</h1>
+        <div className="chart-container">
+          <Line options={options} data={jerkData} />
+        </div>
         <div className="acceleration-grid">
           <div>Acceleration X: {xAcceleration}</div>
           <div>Acceleration Y: {yAcceleration}</div>
